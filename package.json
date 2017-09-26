@@ -1,6 +1,6 @@
 {
-  "name": "phev-message-bridge",
-  "version": "1.0.0",
+  "name": "phev-controller",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@google-cloud/pubsub": "^0.14.2",
+    "phev-mqtt": "github:papawattu/phev-messaging",
     "phev-utils": "github:papawattu/phev-utils"
   }
 }

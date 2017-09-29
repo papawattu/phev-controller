@@ -1,20 +1,12 @@
 import { log, buildMsg, encode, decode, validate, toMessageArray } from 'phev-utils'
-import { DEFAULT_LENGTH, EMPTY_DATA } from './message-constants'
+import { DEFAULT_LENGTH, EMPTY_DATA, REQUEST_TYPE, RESP_CMD } from './message-constants'
 
 const IncomingMessageHandler = ({ messaging }) => {
 
-    const swapNibble = byte => ((byte & 0xf) << 4) | ((byte & 0xf0) >> 4)
-    
-    const defaultResponse = message => buildMsg(swapNibble(message.command))(!message.type & 1)(message.register)(DEFAULT_LENGTH)(EMPTY_DATA)
-    
-    const acknowledgeHandler = message => {
-        messaging.publish(encode(defaultResponse(message)))
-    }
     const logger = message => {
-        log.debug(JSON.stringify(message))
+        log.debug('Incoming Message :' + JSON.stringify(message))
     }
     const handlers = [
-        acknowledgeHandler,
         logger
     ]
 
@@ -22,11 +14,15 @@ const IncomingMessageHandler = ({ messaging }) => {
         toMessageArray(message).map(decode).forEach(msg => handlers.forEach(handler => handler(msg)))
     }
     const start = () => {
+        log.debug('Started incoming message handler')
         messaging.registerHandler(handler)
     }
 
+    const addHandler = handler => handlers.indexOf(handler) < 0 ? handlers.push(handler) : undefined
+    
     return {
-        start: () => start()
+        start,
+        addHandler,
     }
 }
 

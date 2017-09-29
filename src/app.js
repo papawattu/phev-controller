@@ -1,8 +1,7 @@
-import PubSub from '@google-cloud/pubsub'
 import { log } from 'phev-utils'
 import CarController from './car-controller'
 
-const App = ({ carController = CarController()}) => {
+const App = ({ messaging, carController = CarController({ messaging }) } = {}) => {
 
     carController.start()
 }

@@ -7,7 +7,7 @@ const IncomingMessageHandler = ({ messaging }) => {
         log.debug('Incoming Message :' + JSON.stringify(message))
     }
     const handlers = [
-        logger
+    //    logger
     ]
 
     const handler = message => {
@@ -20,9 +20,12 @@ const IncomingMessageHandler = ({ messaging }) => {
 
     const addHandler = handler => handlers.indexOf(handler) < 0 ? handlers.push(handler) : undefined
     
+    const stop = () => undefined
+
     return {
         start,
         addHandler,
+        stop,
     }
 }
 

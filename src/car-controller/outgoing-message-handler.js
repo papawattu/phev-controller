@@ -4,6 +4,8 @@ import codes from '../../codes'
 
 const OutgoingMessageHandler = ({ messaging, mac = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00] }) => {
 
+    let ping, date
+
     const send = message => messaging.publish(encode(message))
 
     const sendFullCommand = (register, data) => {
@@ -22,15 +24,19 @@ const OutgoingMessageHandler = ({ messaging, mac = [0x00, 0x00, 0x00, 0x00, 0x00
 
     const startPing = () => {
         let num = 0
-        setInterval(() => {
+        log.debug('Started ping')
+        return setInterval(() => {
+            log.debug('Send ping num ' + num)
             pingMessage(num)
             num = (num + 1) % 100 
         },1000)
     }
     const startDateSync = () => {
-        let num = 0
-        setInterval(() => {
-            sendDateSync(new Date())
+        log.debug('Started Date synv')
+        return setInterval(() => {
+            const date = new Date()
+            log.debug('Send date sync ' + date.toJSON())
+            sendDateSync(date)
         },30000)
     }
     const start = () => {
@@ -38,13 +44,22 @@ const OutgoingMessageHandler = ({ messaging, mac = [0x00, 0x00, 0x00, 0x00, 0x00
 
         send(buildMsg(START_SEND)(REQUEST_TYPE)(1)(10)(Buffer.from([2].concat(mac))))
         send(buildMsg(SEND_CMD)(REQUEST_TYPE)(0xaa)(DEFAULT_LENGTH)(EMPTY_DATA))
-        startPing()
-        startDateSync()
+        ping = startPing()
+        date = startDateSync()
     }
 
+    const stop = () => {
+        clearInterval(ping)
+        clearInterval(date)
+
+        log.debug('Stopped outgoing message handler')
+    }
     return {
         start,
+        stop,
         send,
+        sendFullCommand,
+        sendSimpleCommand,
     }
 }
 

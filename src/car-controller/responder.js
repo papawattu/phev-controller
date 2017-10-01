@@ -1,7 +1,7 @@
 import { log, buildMsg, encode, decode, validate, toMessageArray } from 'phev-utils'
 import { DEFAULT_LENGTH, EMPTY_DATA, REQUEST_TYPE, RESP_CMD } from './message-constants'
 
-const Responder = ({ messaging }) => {
+const Responder = (publish) => {
 
     const swapNibble = byte => ((byte & 0xf) << 4) | ((byte & 0xf0) >> 4)
 
@@ -10,7 +10,7 @@ const Responder = ({ messaging }) => {
     const acknowledgeHandler = message => {
 
         if (message.type === REQUEST_TYPE && message.command === RESP_CMD) {
-            messaging.publish(encode(acknowledgeResponse(message)))
+            publish(acknowledgeResponse(message))
         }
     }
     return {

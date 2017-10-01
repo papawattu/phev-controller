@@ -9,6 +9,7 @@ const pubSub = {}
 
 const carController = {}
 carController.start = sinon.stub()
+carController.on = sinon.stub()
 
 describe('App', () => {
     beforeEach(() => {

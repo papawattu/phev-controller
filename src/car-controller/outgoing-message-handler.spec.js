@@ -16,6 +16,9 @@ describe('Outgoing Message Handler', () => {
     beforeEach(() => {
         sut = OutgoingMessageHandler({ messaging, mac })
     })
+    after(() => {
+        sut.stop()
+    })
     it('Should have start command', () => {
         assert(sut.start)
     })

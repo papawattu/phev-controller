@@ -8,7 +8,8 @@
     "start": "npm run build && node lib/index.js",
     "test-unit": "cross-env NODE_ENV=test mocha --require babel-polyfill --compilers js:babel-core/register --recursive ./src/**/*.spec.js",
     "test-watch": "cross-env NODE_ENV=test DEBUG=true mocha --watch --require babel-polyfill --compilers js:babel-core/register --recursive ./src/**/*.spec.js",
-    "build": "babel src -d lib",
+    "clean": "rimraf lib",
+    "build": "npm run clean && babel src -d lib",
     "deploy": "npm run build"
   },
   "author": "",
@@ -23,7 +24,10 @@
     "sinon": "^3.3.0"
   },
   "dependencies": {
+    "express": "^4.16.1",
     "phev-messaging": "github:papawattu/phev-messaging",
-    "phev-utils": "github:papawattu/phev-utils"
+    "phev-utils": "github:papawattu/phev-utils",
+    "rimraf": "^2.6.2",
+    "ws": "^3.2.0"
   }
 }

@@ -3,6 +3,7 @@ const RegisterStore = register => {
 
     return {
         set: register => store[register.register] = { register: register.register, data: register.data },
+        get: id => Promise.resolve(store[id]),
         display: () => store.forEach(reg => reg != null ? console.log(JSON.stringify(reg)) : '')
     }
 }

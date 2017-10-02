@@ -21,9 +21,7 @@ const RegisterStore = register => {
             
             store[register.register] = { data: register.data }
         },   
-        get: id => {
-            return Promise.resolve(store[id])    
-        },
+        get: id => Promise.resolve(store[id]),
     }
 }
 

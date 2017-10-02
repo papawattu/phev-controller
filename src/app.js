@@ -25,6 +25,7 @@ const App = ({ messaging, carController = CarController({ messaging, store: Regi
         })
         carController.on('disconnected', () => {
             console.log('Stopped')
+            ws.close()
         })
         carController.on('connected', () => {
             carController.on('message', message => {
@@ -38,9 +39,9 @@ const App = ({ messaging, carController = CarController({ messaging, store: Regi
                 carController.sendSimpleCommand(command.register,command.value)      
             })
             ws.on('close', () => {
-                log.info('WS Connection closed')
-    
+                log.info('WS Connection closed')    
                 carController.stop()
+                ws.close()
             })
         })
     })

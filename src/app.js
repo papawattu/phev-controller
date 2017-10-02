@@ -10,7 +10,7 @@ const App = ({ messaging, carController = CarController({ messaging, store: Regi
     carController.start()
 
     carController.on('timeout', () => {
-        log.wanr('TIMEOUT')
+        log.warn('TIMEOUT')
     })
     carController.on('disconnected', () => {
         log.info('Stopped')

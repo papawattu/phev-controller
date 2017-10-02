@@ -7,43 +7,18 @@ import Http from 'http'
 
 const App = ({ messaging, carController = CarController({ messaging, store: RegisterStore() }) } = {}) => {
 
-    const express = Express()
-    
-    const server = Http.createServer(express)
-    const wss = new WebSocket.Server({ server })
-    
-    server.listen(8080, () => {
-        log.info(`Listening on port ${server.address().port}`)
+    carController.start()
+
+    carController.on('timeout', () => {
+        log.wanr('TIMEOUT')
     })
-
-    wss.on('connection', ws => {
-        log.info('WS Connection opened')
-        carController.start()
-        
-        carController.on('timeout', () => {
-            console.log('TIMEOUT')
-        })
-        carController.on('disconnected', () => {
-            console.log('Stopped')
-            ws.close()
-        })
-        carController.on('connected', () => {
-            carController.on('message', message => {
-                log.debug('WS outgoing message : ' + message)
-                ws.send(JSON.stringify(message))
-            })
-            ws.on('message', data => {
-                log.debug('WS incoming message : ' + data)
-                const command = JSON.parse(data)
-
-                carController.sendSimpleCommand(command.register,command.value)      
-            })
-            ws.on('close', () => {
-                log.info('WS Connection closed')    
-                carController.stop()
-                ws.close()
-            })
-        })
+    carController.on('disconnected', () => {
+        log.info('Stopped')
+    })
+    process.on('SIGINT', () => {
+        log.info('Received SIGINT - Shutting down.')
+        carController.stop()
+            .then(() => process.exit(0))
     })
 }
 

@@ -7,7 +7,7 @@ const IncomingMessageHandler = ({ messaging }) => {
         log.debug('Incoming Message :' + JSON.stringify(message))
     }
     const handlers = [
-    //    logger
+        logger
     ]
 
     const handler = message => {

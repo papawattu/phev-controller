@@ -17,20 +17,31 @@ const App = ({ messaging, carController = CarController({ messaging, store: Regi
     })
 
     wss.on('connection', ws => {
-    
+        log.info('WS Connection opened')
         carController.start()
- 
-        carController.on('message', message => {
-            console.log(JSON.stringify(message))
-            ws.send(JSON.stringify(message))
+        
+        carController.on('timeout', () => {
+            console.log('TIMEOUT')
         })
-        ws.on('message', data => {
-            carController.send(JSON.parse(data))      
+        carController.on('disconnected', () => {
+            console.log('Stopped')
         })
-        ws.on('close', () => {
-            log.info('Connection closed')
+        carController.on('connected', () => {
+            carController.on('message', message => {
+                log.debug('WS outgoing message : ' + message)
+                ws.send(JSON.stringify(message))
+            })
+            ws.on('message', data => {
+                log.debug('WS incoming message : ' + data)
+                const command = JSON.parse(data)
 
-            carController.stop()
+                carController.sendSimpleCommand(command.register,command.value)      
+            })
+            ws.on('close', () => {
+                log.info('WS Connection closed')
+    
+                carController.stop()
+            })
         })
     })
 }

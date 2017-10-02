@@ -13,67 +13,90 @@ const CarController = ({
 } = {}) => {
 
     const ev = new EventEmitter()
-    
+
     const { set, get } = store
 
-    const { acknowledgeHandler } = Responder(message => {
-        outgoingMessageHandler.send(message)
-    })
+    const connected = () => {
+        outgoingMessageHandler.startPingAndDateSync()
+        ev.emit('connected')
+    }
 
+    const {
+        acknowledgeHandler,
+        startResponseHandler,
+        timeoutCheckHandler,
+        startMessageTimeout,
+        stopMessageTimeout,
+    } = Responder(
+            {
+                publish: message => outgoingMessageHandler.send(message),
+                connected: () => connected(),
+                timeout: () => timeout(),
+            })
+
+    const timeout = () => {
+        stopMessageTimeout()
+        ev.emit('timeout')
+        stop()
+    }
     const registerChanged = register => new Promise((resolve, reject) => store.get(register.register)
-            .then(reg => {
-                if(reg === undefined) {
-                    return resolve(true)
-                } 
-        
-                if(reg.data.equals(register.data)) {
-                    return resolve(false)
-                } else {
-                    return resolve(true)
-                } 
-            }))
-    
+        .then(reg => {
+            if (reg === undefined) {
+                return resolve(true)
+            }
+
+            if (reg.data.equals(register.data)) {
+                return resolve(false)
+            } else {
+                return resolve(true)
+            }
+        }))
+
     const hasRegisterChanged = message => {
-        if((message.command === RESP_CMD) && (message.type === REQUEST_TYPE)) {
+        if ((message.command === RESP_CMD) && (message.type === REQUEST_TYPE)) {
             return registerChanged(message)
         } else {
             return Promise.resolve(false)
         }
     }
-    const updateRegister = register => hasRegisterChanged(register)
+    const updateRegisterHandler = register => hasRegisterChanged(register)
         .then(changed => changed ? store.set(register) : false)
 
-    const emitMessage = message => 
+    const emitMessageHandler = message =>
         hasRegisterChanged(message)
             .then(changed => changed ? ev.emit('message', {
                 register: message.register,
                 data: message.data
-                }) : undefined)
+            }) : undefined)
 
     const addHandlers = () => {
+        incomingMessageHandler.addHandler(timeoutCheckHandler)
+        incomingMessageHandler.addHandler(startResponseHandler)
         incomingMessageHandler.addHandler(acknowledgeHandler)
-        incomingMessageHandler.addHandler(emitMessage)
-        incomingMessageHandler.addHandler(updateRegister)
+        incomingMessageHandler.addHandler(emitMessageHandler)
+        incomingMessageHandler.addHandler(updateRegisterHandler)
     }
     const start = () =>
         messaging.start()
             .then(() => {
+                addHandlers()                
                 incomingMessageHandler.start()
                 outgoingMessageHandler.start()
-
-                addHandlers()
+                startMessageTimeout()
             })
 
     const stop = () =>
         messaging.stop()
             .then(() => {
+                stopMessageTimeout()
                 outgoingMessageHandler.stop()
                 incomingMessageHandler.stop()
+                ev.emit('disconnected')
                 ev.removeAllListeners()
             })
     ev.start = start
     ev.stop = stop
-    ev.send = outgoingMessageHandler.send
+    ev.sendSimpleCommand = outgoingMessageHandler.sendSimpleCommand
     return ev
 }
 

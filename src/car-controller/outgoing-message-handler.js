@@ -44,10 +44,12 @@ const OutgoingMessageHandler = ({ messaging, mac = [0x00, 0x00, 0x00, 0x00, 0x00
 
         send(buildMsg(START_SEND)(REQUEST_TYPE)(1)(10)(Buffer.from([2].concat(mac))))
         send(buildMsg(SEND_CMD)(REQUEST_TYPE)(0xaa)(DEFAULT_LENGTH)(EMPTY_DATA))
+    }
+
+    const startPingAndDateSync = () => {
         ping = startPing()
         date = startDateSync()
     }
-
     const stop = () => {
         clearInterval(ping)
         clearInterval(date)
@@ -60,6 +62,7 @@ const OutgoingMessageHandler = ({ messaging, mac = [0x00, 0x00, 0x00, 0x00, 0x00
         send,
         sendFullCommand,
         sendSimpleCommand,
+        startPingAndDateSync,
     }
 }
 

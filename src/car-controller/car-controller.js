@@ -82,6 +82,7 @@ const CarController = ({
                 addHandlers()                
                 incomingMessageHandler.start()
                 outgoingMessageHandler.start()
+                connected()
                 startMessageTimeout()
             })
 

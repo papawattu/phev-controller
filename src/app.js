@@ -18,7 +18,7 @@ const App = ({ messaging, carController = CarController({ messaging, store: Regi
     const server = express.listen(8080, () => {
         log.info('Endpoints started on port ' + server.address().port)
     })
-    
+
     carController.start()
 
     carController.on('connected', () => {
@@ -31,10 +31,8 @@ const App = ({ messaging, carController = CarController({ messaging, store: Regi
 
     })
 
-    carController.on('timeout', () => {
-        log.warn('Timeout')
-    })
     carController.on('disconnected', () => {
+        server.close()
         log.info('Disconnected')
     })
     process.on('SIGINT', () => {

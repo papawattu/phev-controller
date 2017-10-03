@@ -32,7 +32,6 @@ const App = ({ messaging, carController = CarController({ messaging, store: Regi
     })
 
     carController.on('disconnected', () => {
-        server.close()
         log.info('Disconnected')
     })
     process.on('SIGINT', () => {

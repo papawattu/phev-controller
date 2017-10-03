@@ -34,10 +34,15 @@ const CarController = ({
                 timeout: () => timeout(),
             })
 
+    const restart = () => {
+        stop()
+            .then(() => start())
+    }
+
     const timeout = () => {
         stopMessageTimeout()
         ev.emit('timeout')
-        stop()
+        restart()
     }
     const registerChanged = register => new Promise((resolve, reject) => store.get(register.register)
         .then(reg => {

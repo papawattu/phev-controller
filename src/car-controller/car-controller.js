@@ -120,6 +120,7 @@ const CarController = ({
     ev.start = start
     ev.stop = stop
     ev.sendSimpleCommand = outgoingMessageHandler.sendSimpleCommand
+    ev.onAcknowledge = onAcknowledge
     return ev
 }
 

@@ -21,6 +21,9 @@ const CarController = ({
         ev.emit('connected')
     }
 
+    const commandCallback = register => {
+        console.log(register)
+    }
     const {
         acknowledgeHandler,
         startResponseHandler,
@@ -33,6 +36,7 @@ const CarController = ({
                 publish: message => outgoingMessageHandler.send(message),
                 connected: () => connected(),
                 timeout: () => timeout(),
+                commandCallback: commandCallback
             })
 
     const restart = () => {

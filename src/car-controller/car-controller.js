@@ -35,7 +35,6 @@ const CarController = ({
                 register.callback(register)
             })
         }
-    }
     const {
         acknowledgeHandler,
         startResponseHandler,

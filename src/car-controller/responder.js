@@ -1,7 +1,7 @@
 import { log, buildMsg, encode, decode, validate, toMessageArray } from 'phev-utils'
 import { DEFAULT_LENGTH, EMPTY_DATA, REQUEST_TYPE, RESP_CMD, START_RESP, RESPONSE_TYPE } from './message-constants'
 
-const TIMEOUT = 15000
+const TIMEOUT = 60000
 const TIMEOUT_CHECK_INTERVAL = 5000
 
 const Responder = ({ publish, connected, timeout }) => {
@@ -20,6 +20,8 @@ const Responder = ({ publish, connected, timeout }) => {
         }
     }
 
+    const commandAcknowledgementHandler = message => 
+        message.type === RESPONSE_TYPE && message.command === RESP_CMD ? console.log('Command ack ' + message.register) : undefined
     const startResponseHandler = message => {
 
         if (message.command === START_RESP && message.type === RESPONSE_TYPE && message.register === 1) {
@@ -54,6 +56,7 @@ const Responder = ({ publish, connected, timeout }) => {
         timeoutCheckHandler,
         startMessageTimeout,
         stopMessageTimeout,
+        commandAcknowledgementHandler,
     }
 }
 

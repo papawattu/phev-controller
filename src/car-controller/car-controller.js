@@ -42,8 +42,6 @@ const CarController = ({
         startMessageTimeout,
         stopMessageTimeout,
         commandAcknowledgementHandler,
-        onAcknowledge,
-        removeAcknowledge,
     } = Responder(
             {
                 publish: message => outgoingMessageHandler.send(message),

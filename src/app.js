@@ -26,7 +26,9 @@ const App = ({ messaging, carController = CarController({ messaging, store: Regi
         express.post('/send', (req, res) => {
             log.debug(`COMMAND Reg ${req.body.register}  Value ${req.body.value}`)
             carController.sendSimpleCommand(req.body.register, req.body.value)
-            res.sendStatus(200)
+            carController.onAcknowledge(req.body.register, () => {
+                res.sendStatus(200)
+            })
         })
 
     })

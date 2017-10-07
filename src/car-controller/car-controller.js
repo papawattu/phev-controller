@@ -21,8 +21,20 @@ const CarController = ({
         ev.emit('connected')
     }
 
+    const pendingCalls = []
+
+    const onAcknowledge = (register, callback) => {
+        pendingCalls.push({ register, callback })
+    }
+    const removeAcknowledge = x => {
+        pendingCalls.pop()
+    }
     const commandCallback = register => {
-        console.log(register)
+        pendingCalls.filter(reg => reg.register === register )
+            .map((register,idx) => {
+                register.callback(register)
+            })
+        }
     }
     const {
         acknowledgeHandler,
@@ -31,6 +43,8 @@ const CarController = ({
         startMessageTimeout,
         stopMessageTimeout,
         commandAcknowledgementHandler,
+        onAcknowledge,
+        removeAcknowledge,
     } = Responder(
             {
                 publish: message => outgoingMessageHandler.send(message),
@@ -90,7 +104,7 @@ const CarController = ({
     const start = () =>
         messaging.start()
             .then(() => {
-                addHandlers()                
+                addHandlers()
                 incomingMessageHandler.start()
                 outgoingMessageHandler.start()
                 connected()

@@ -2,7 +2,7 @@ import IncomingMessageHandler from './incoming-message-handler'
 import OutgoingMessageHandler from './outgoing-message-handler'
 import Responder from './responder'
 import EventEmitter from 'events'
-import { RESP_CMD, REQUEST_TYPE } from './message-constants'
+import { RESP_CMD, REQUEST_TYPE, RESPONSE_TYPE } from './message-constants'
 import { log } from 'phev-utils'
 
 const CarController = ({
@@ -21,20 +21,6 @@ const CarController = ({
         ev.emit('connected')
     }
 
-    const pendingCalls = []
-
-    const onAcknowledge = (register, callback) => {
-        pendingCalls.push({ register, callback })
-    }
-    const removeAcknowledge = x => {
-        pendingCalls.pop()
-    }
-    const commandCallback = register => {
-        pendingCalls.filter(reg => reg.register === register )
-            .map((register,idx) => {
-                register.callback(register)
-            })
-        }
     const {
         acknowledgeHandler,
         startResponseHandler,
@@ -96,7 +82,6 @@ const CarController = ({
         incomingMessageHandler.addHandler(acknowledgeHandler)
         incomingMessageHandler.addHandler(emitMessageHandler)
         incomingMessageHandler.addHandler(updateRegisterHandler)
-        incomingMessageHandler.addHandler(commandAcknowledgementHandler)
     }
     const start = () =>
         messaging.start()
@@ -117,10 +102,38 @@ const CarController = ({
                 ev.emit('disconnected')
                 ev.removeAllListeners()
             })
+
+    const commandCallback = register => {
+        pendingCalls.filter(reg => reg.register === register)
+            .map((register, idx) => {
+                register.callback(register)
+            })
+    }
+    const isCommandResponse = message => message.command === RESP_CMD && message.type === RESPONSE_TYPE
+    
+    const sendSimpleCommand = (register, value) =>
+        new Promise((resolve, reject) => {
+
+            const timeout = setTimeout(() => {
+                log.error('Command acknowledgement timeout')
+                reject('Timeout after 5 seconds')
+            },5000)
+            const commandAcknowledgeHandler = register => message => { 
+                if(isCommandResponse(message) && message.register === register) {
+                    incomingMessageHandler.removeHandler(this)
+                    clearTimeout(timeout)
+                    resolve(message)
+                } 
+            }
+
+            incomingMessageHandler.addHandler(commandAcknowledgeHandler(register))
+
+            outgoingMessageHandler.sendSimpleCommand(register, value)
+
+        })
     ev.start = start
     ev.stop = stop
-    ev.sendSimpleCommand = outgoingMessageHandler.sendSimpleCommand
-    ev.onAcknowledge = onAcknowledge
+    ev.sendSimpleCommand = sendSimpleCommand
     return ev
 }
 

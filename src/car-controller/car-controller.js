@@ -13,11 +13,18 @@ const CarController = ({
 } = {}) => {
 
     const ev = new EventEmitter()
-
+    
     const { set, get } = store
 
+    let currentPing = 0
+    
+    const getCurrentPing = () => currentPing
+    
+    const pingCallback = () => currentPing = getCurrentPing() + 1
+    
     const connected = () => {
-        outgoingMessageHandler.startPingAndDateSync()
+ 
+        outgoingMessageHandler.startPingAndDateSync({ getCurrentPing })
         ev.emit('connected')
     }
 
@@ -28,12 +35,14 @@ const CarController = ({
         startMessageTimeout,
         stopMessageTimeout,
         commandAcknowledgementHandler,
+        pingResponseHandler,
     } = Responder(
             {
                 publish: message => outgoingMessageHandler.send(message),
                 connected: () => connected(),
                 timeout: () => timeout(),
-                commandCallback: commandCallback
+                commandCallback: commandCallback,
+                pingCallback
             })
 
     const restart = () => {
@@ -82,7 +91,9 @@ const CarController = ({
         incomingMessageHandler.addHandler(acknowledgeHandler)
         incomingMessageHandler.addHandler(emitMessageHandler)
         incomingMessageHandler.addHandler(updateRegisterHandler)
+        incomingMessageHandler.addHandler(pingResponseHandler)
     }
+    
     const start = () =>
         messaging.start()
             .then(() => {

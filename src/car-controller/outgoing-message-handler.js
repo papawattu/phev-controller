@@ -18,13 +18,11 @@ const OutgoingMessageHandler = ({ messaging, mac = [0x00, 0x00, 0x00, 0x00, 0x00
     
     const pingMessage = num => send(createPingRequest(num))
 
-    const startPing = () => {
-        let num = 0
+    const startPing = ({ getCurrentPing }) => {
         log.debug('Started ping')
         return setInterval(() => {
-            log.debug('Send ping num ' + num)
-            pingMessage(num)
-            num = (num + 1) % 100 
+            log.debug('Send ping num ' + getCurrentPing())
+            pingMessage(getCurrentPing())
         },1000)
     }
     const startDateSync = () => {
@@ -42,8 +40,8 @@ const OutgoingMessageHandler = ({ messaging, mac = [0x00, 0x00, 0x00, 0x00, 0x00
         send(buildMsg(SEND_CMD)(REQUEST_TYPE)(0xaa)(DEFAULT_LENGTH)(EMPTY_DATA))
     }
 
-    const startPingAndDateSync = () => {
-        ping = startPing()
+    const startPingAndDateSync = ({ getCurrentPing }) => {
+        ping = startPing({ getCurrentPing })
         date = startDateSync()
     }
     const stop = () => {

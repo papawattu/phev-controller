@@ -15,7 +15,7 @@ const App = ({ messaging, carController = CarController({ messaging, store: Regi
     express.use(bodyParser.urlencoded({ extended: true }))
     express.use(cors())
 
-    const server = express.listen(8080, () => {
+    const server = express.listen(8081, () => {
         log.info('Endpoints started on port ' + server.address().port)
     })
 

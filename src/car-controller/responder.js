@@ -1,10 +1,10 @@
 import { log, buildMsg, encode, decode, validate, toMessageArray } from 'phev-utils'
-import { DEFAULT_LENGTH, EMPTY_DATA, REQUEST_TYPE, RESP_CMD, START_RESP, RESPONSE_TYPE } from './message-constants'
+import { DEFAULT_LENGTH, EMPTY_DATA, REQUEST_TYPE, RESP_CMD, START_RESP, RESPONSE_TYPE, PING_RESP_CMD } from './message-constants'
 
 const TIMEOUT = 60000
 const TIMEOUT_CHECK_INTERVAL = 5000
 
-const Responder = ({ publish, connected, timeout, commandCallback }) => {
+const Responder = ({ publish, connected, timeout, commandCallback, pingCallback }) => {
 
     let lastMessageTime = undefined
     let timeoutInterval = undefined
@@ -51,6 +51,10 @@ const Responder = ({ publish, connected, timeout, commandCallback }) => {
 
     const timeoutCheckHandler = message => lastMessageTime = updateMessageTime()
 
+    const isPingResponse = message => message.command === PING_RESP_CMD && message.type === RESPONSE_TYPE
+    
+    const pingResponseHandler = message => isPingResponse(message) ? pingCallback(message.register) : message
+    
     return {
         acknowledgeHandler,
         startResponseHandler,
@@ -58,6 +62,7 @@ const Responder = ({ publish, connected, timeout, commandCallback }) => {
         startMessageTimeout,
         stopMessageTimeout,
         commandAcknowledgementHandler,
+        pingResponseHandler,
     }
 }
 

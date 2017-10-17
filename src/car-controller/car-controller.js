@@ -18,6 +18,8 @@ const CarController = ({
 
     let currentPing = 0
     
+    const resetPing = () => currentPing = 0
+    
     const getCurrentPing = () => currentPing
     
     const pingCallback = () => currentPing = getCurrentPing() + 1
@@ -97,6 +99,7 @@ const CarController = ({
     const start = () =>
         messaging.start()
             .then(() => {
+                resetPing()
                 addHandlers()
                 incomingMessageHandler.start()
                 outgoingMessageHandler.start()

@@ -24,9 +24,9 @@ const OutgoingMessageHandler = ({ messaging, mac = [0x00, 0x00, 0x00, 0x00, 0x00
             let lastPing = 0
             const currentPing = getCurrentPing()
             log.debug('Send ping num ' + getCurrentPing())
-            if(currentPing() !== lastPing) {
-                pingMessage(currentPing())
-                lastPing = currentPing()
+            if(currentPing !== lastPing) {
+                pingMessage(currentPing)
+                lastPing = currentPing
             } else {
                 log.debug('Missed a ping')
             }

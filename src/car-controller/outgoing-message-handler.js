@@ -24,7 +24,6 @@ const OutgoingMessageHandler = ({ messaging, mac = [0x00, 0x00, 0x00, 0x00, 0x00
             const currentPing = getCurrentPing()
             log.debug('Send ping num ' + getCurrentPing())
             pingMessage(currentPing)
-            lastPing = currentPing
         },1000)
     }
     const startDateSync = () => {

@@ -22,7 +22,7 @@ const CarController = ({
     
     const getCurrentPing = () => currentPing
     
-    const pingCallback = num => currentPing = num + 1
+    const pingCallback = num => currentPing += 1
     
     const connected = () => {
  

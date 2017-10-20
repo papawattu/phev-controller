@@ -2,7 +2,7 @@ import IncomingMessageHandler from './incoming-message-handler'
 import OutgoingMessageHandler from './outgoing-message-handler'
 import Responder from './responder'
 import EventEmitter from 'events'
-import { RESP_CMD, REQUEST_TYPE } from './message-constants'
+import { RESP_CMD, REQUEST_TYPE, RESPONSE_TYPE } from './message-constants'
 import { log } from 'phev-utils'
 
 const CarController = ({
@@ -13,11 +13,20 @@ const CarController = ({
 } = {}) => {
 
     const ev = new EventEmitter()
-
+    
     const { set, get } = store
 
+    let currentPing = 0
+    
+    const resetPing = () => currentPing = 0
+    
+    const getCurrentPing = () => currentPing
+    
+    const pingCallback = num => currentPing += 1
+    
     const connected = () => {
-        outgoingMessageHandler.startPingAndDateSync()
+ 
+        outgoingMessageHandler.startPingAndDateSync({ getCurrentPing })
         ev.emit('connected')
     }
 
@@ -27,17 +36,26 @@ const CarController = ({
         timeoutCheckHandler,
         startMessageTimeout,
         stopMessageTimeout,
+        commandAcknowledgementHandler,
+        pingResponseHandler,
     } = Responder(
             {
                 publish: message => outgoingMessageHandler.send(message),
                 connected: () => connected(),
                 timeout: () => timeout(),
+                commandCallback: commandCallback,
+                pingCallback
             })
+
+    const restart = () => {
+        stop()
+            .then(() => start())
+    }
 
     const timeout = () => {
         stopMessageTimeout()
         ev.emit('timeout')
-        stop()
+        restart()
     }
     const registerChanged = register => new Promise((resolve, reject) => store.get(register.register)
         .then(reg => {
@@ -75,13 +93,17 @@ const CarController = ({
         incomingMessageHandler.addHandler(acknowledgeHandler)
         incomingMessageHandler.addHandler(emitMessageHandler)
         incomingMessageHandler.addHandler(updateRegisterHandler)
+        incomingMessageHandler.addHandler(pingResponseHandler)
     }
+    
     const start = () =>
         messaging.start()
             .then(() => {
-                addHandlers()                
+                resetPing()
+                addHandlers()
                 incomingMessageHandler.start()
                 outgoingMessageHandler.start()
+                connected()
                 startMessageTimeout()
             })
 
@@ -94,9 +116,38 @@ const CarController = ({
                 ev.emit('disconnected')
                 ev.removeAllListeners()
             })
+
+    const commandCallback = register => {
+        pendingCalls.filter(reg => reg.register === register)
+            .map((register, idx) => {
+                register.callback(register)
+            })
+    }
+    const isCommandResponse = message => message.command === RESP_CMD && message.type === RESPONSE_TYPE
+    
+    const sendSimpleCommand = (register, value) =>
+        new Promise((resolve, reject) => {
+
+            const timeout = setTimeout(() => {
+                log.error('Command acknowledgement timeout')
+                reject('Timeout after 5 seconds')
+            },5000)
+            const commandAcknowledgeHandler = register => message => { 
+                if(isCommandResponse(message) && message.register === register) {
+                    incomingMessageHandler.removeHandler(this)
+                    clearTimeout(timeout)
+                    resolve(message)
+                } 
+            }
+
+            incomingMessageHandler.addHandler(commandAcknowledgeHandler(register))
+
+            outgoingMessageHandler.sendSimpleCommand(register, value)
+
+        })
     ev.start = start
     ev.stop = stop
-    ev.sendSimpleCommand = outgoingMessageHandler.sendSimpleCommand
+    ev.sendSimpleCommand = sendSimpleCommand
     return ev
 }
 

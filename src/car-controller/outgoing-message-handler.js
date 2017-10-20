@@ -27,7 +27,7 @@ const OutgoingMessageHandler = ({ messaging, mac = [0x00, 0x00, 0x00, 0x00, 0x00
         },1000)
     }
     const startDateSync = () => {
-        log.debug('Started Date synv')
+        log.debug('Started Date sync')
         return setInterval(() => {
             const date = new Date()
             log.debug('Send date sync ' + date.toJSON())

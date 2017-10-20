@@ -14,15 +14,14 @@ const RegisterStore = register => {
 
     return {
         set: register => {
-            const reg = firebase.database().ref('registers').child(register.register)
+            firebase.database()
+                .ref('registers')
+                .child(register.register)
+                .set({ data: register.data, updated: new Date().toJSON() })
             
             store[register.register] = { data: register.data }
-            
-            reg.set({ data: register.data, updated: new Date().toJSON() })
         },   
-        get: id => {
-            return Promise.resolve(store[id])    
-        },
+        get: id => Promise.resolve(store[id]),
     }
 }
 

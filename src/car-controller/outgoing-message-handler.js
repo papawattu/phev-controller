@@ -8,27 +8,22 @@ const OutgoingMessageHandler = ({ messaging, mac = [0x00, 0x00, 0x00, 0x00, 0x00
 
     const send = message => messaging.publish(encode(message))
 
-    const sendFullCommand = (register, data) => {
-        const msg = buildMsg(SEND_CMD)(REQUEST_TYPE)(register)(DEFAULT_LENGTH + data.length-1)(data)
-        send(msg)
-    }
-    const sendSimpleCommand = (register, value) => {
-        const msg = buildMsg(SEND_CMD)(REQUEST_TYPE)(register)(DEFAULT_LENGTH)(Buffer.from([value]))
-        send(msg)
-    }
+    const sendFullCommand = (register, data) => send(buildMsg(SEND_CMD)(REQUEST_TYPE)(register)(DEFAULT_LENGTH + data.length-1)(data))
+
+    const sendSimpleCommand = (register, value) => send(buildMsg(SEND_CMD)(REQUEST_TYPE)(register)(DEFAULT_LENGTH)(Buffer.from([value])))
+    
     const sendDateSync = date => sendFullCommand(codes.KO_WF_DATE_INFO_SYNC_SP,Buffer.from([date.getFullYear()-2000,date.getMonth()+1,date.getDate(),date.getHours(),date.getMinutes(),date.getSeconds(),1]))
 
     const createPingRequest = num => buildMsg(PING_SEND_CMD)(REQUEST_TYPE)(num)(DEFAULT_LENGTH)(EMPTY_DATA)
     
     const pingMessage = num => send(createPingRequest(num))
 
-    const startPing = () => {
-        let num = 0
+    const startPing = ({ getCurrentPing }) => {
         log.debug('Started ping')
         return setInterval(() => {
-            log.debug('Send ping num ' + num)
-            pingMessage(num)
-            num = (num + 1) % 100 
+            const currentPing = getCurrentPing()
+            log.debug('Send ping num ' + getCurrentPing())
+            pingMessage(currentPing)
         },1000)
     }
     const startDateSync = () => {
@@ -46,8 +41,8 @@ const OutgoingMessageHandler = ({ messaging, mac = [0x00, 0x00, 0x00, 0x00, 0x00
         send(buildMsg(SEND_CMD)(REQUEST_TYPE)(0xaa)(DEFAULT_LENGTH)(EMPTY_DATA))
     }
 
-    const startPingAndDateSync = () => {
-        ping = startPing()
+    const startPingAndDateSync = ({ getCurrentPing }) => {
+        ping = startPing({ getCurrentPing })
         date = startDateSync()
     }
     const stop = () => {

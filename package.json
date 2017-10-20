@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npm run test-unit",
+    "test": "npm run test-unit && npm run test-integration",
     "start": "npm run build && node lib/index.js",
     "test-unit": "cross-env NODE_ENV=test mocha --require babel-polyfill --compilers js:babel-core/register --recursive ./src/**/*.spec.js",
     "test-watch": "cross-env NODE_ENV=test DEBUG=true mocha --watch --require babel-polyfill --compilers js:babel-core/register --recursive ./src/**/*.spec.js",
+    "test-integration": "cross-env NODE_ENV=test DEBUG=true mocha --require babel-polyfill --compilers js:babel-core/register --recursive ./integration-tests/src/**/*.spec.js",
     "clean": "rimraf lib",
     "build": "npm run clean && babel src -d lib",
     "deploy": "npm run build"

@@ -26,7 +26,7 @@
   "dependencies": {
     "express": "^4.16.1",
     "firebase": "^4.4.0",
-    "phev-messaging": "github:papawattu/phev-messaging",
+    "phev-messaging": "github:papawattu/phev-messaging#nogoogle",
     "phev-utils": "github:papawattu/phev-utils",
     "rimraf": "^2.6.2",
     "ws": "^3.2.0"

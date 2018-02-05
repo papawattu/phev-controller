@@ -22,14 +22,14 @@
     "chai": "^4.1.2",
     "cross-env": "^5.0.5",
     "mocha": "^3.5.3",
+    "phev-messaging": "github:papawattu/phev-messaging#master",
+    "phev-utils": "github:papawattu/phev-utils#master",
     "sinon": "^3.3.0"
   },
   "dependencies": {
     "cors": "^2.8.4",
     "express": "^4.16.1",
     "firebase": "^4.4.0",
-    "phev-messaging": "github:papawattu/phev-messaging",
-    "phev-utils": "github:papawattu/phev-utils",
     "rimraf": "^2.6.2",
     "ws": "^3.2.0"
   }
